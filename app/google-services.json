@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "430693081652",
+    "firebase_url": "https://bia-app-6f813.firebaseio.com",
+    "project_id": "bia-app-6f813",
+    "storage_bucket": "bia-app-6f813.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:430693081652:android:e5a15c25070c3b50352061",
+        "android_client_info": {
+          "package_name": "com.example.bia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "430693081652-nq8sno67pa3rd9bj0rje2lbl5lq3cubd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEtXnBqPafQy7_G5HC5-RG-ULwca9r16I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "430693081652-nq8sno67pa3rd9bj0rje2lbl5lq3cubd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
