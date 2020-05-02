@@ -1,4 +1,38 @@
 <resources>
     <string name="app_name">Bia</string>
     <string name="bia">Bia</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="new_user_registration">New User Registration</string>
+    <string name="register_new_user">Register New User</string>
+
+    <string-array name="symptoms_array">
+        <item>Cramps</item>
+        <item>Acne Breakouts</item>
+        <item>Tender Breasts</item>
+        <item>Fatigue</item>
+        <item>Bloating</item>
+        <item>Headache</item>
+        <item>Mood Swings</item>
+        <item>Lower Back Pain</item>
+        <item>Nausea</item>
+        <item>Food Cravings</item>
+        <item>Insomnia</item>
+        <item>Constipation</item>
+        <item>Diarrhea</item>
+    </string-array>
+
+    <string-array name="mood_array">
+        <item>Calm</item>
+        <item>Happy</item>
+        <item>Energetic</item>
+        <item>Frisky</item>
+        <item>Irritated</item>
+        <item>Sad</item>
+        <item>Anxious</item>
+        <item>Depressed</item>
+        <item>Self-critical</item>
+    </string-array>
+
 </resources>

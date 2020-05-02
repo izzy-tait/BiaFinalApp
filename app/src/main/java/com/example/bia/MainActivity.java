@@ -1,8 +1,10 @@
 package com.example.bia;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -13,10 +15,16 @@ import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -32,17 +40,20 @@ import static java.io.File.createTempFile;
 public class MainActivity extends AppCompatActivity {
 
         ImageView rightHeart;
+        ImageButton calendarIcon;
         private int i=0;
         long startTime;
 
         private MediaRecorder recorder = null;
         private static String fileName = null;
         private static final String LOG_TAG = "Record_log";
+
+
         //Context context= getApplicationContext();
         //File cacheDirectory = this.getCacheDir();
         //File tempFile= File.createTempFile("test1", "3gp", cacheDirectory);
         //File tempFile=Context.getCacheDir().getAbsolutePath();
-        String cacheDirectory=null;
+        //String cacheDirectory=null;
 
     //String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-kkmmss"));
     //File outputFile = new File(context.getCacheDir(), "output-${timestamp}.txt")
@@ -54,37 +65,70 @@ public class MainActivity extends AppCompatActivity {
         View.OnTouchListener recordVoiceListener = new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent motionEvent) {
-                countUserClicks(v, motionEvent);
+                countUserClicks();
+
 
                 return false;
             }
         };
 
+    View.OnClickListener calendarPage = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            displayCalendarPage();
+        }
+    };
+
     @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
+            getSupportActionBar().hide();
             rightHeart=findViewById(R.id.imageViewRight);
-            Context context= getApplicationContext();
-            cacheDirectory= context.getCacheDir().toString();
+            calendarIcon=findViewById(R.id.calendarIcon);
+//            Context context= getApplicationContext();
+//            cacheDirectory= context.getCacheDir().toString();
             //File cacheDirectory = this.getCacheDir();
             //tempFile = File.createTempFile("first", "3gp");
 
         //tempFile=new File(cacheDirectory, "testTempfile" + "3gp");
 
+        String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        mStorageRef = FirebaseStorage.getInstance().getReference();
+        mStorageRef = FirebaseStorage.getInstance().getReference(userUid);
 
             fileName= Environment.getExternalStorageDirectory().getAbsolutePath();
             //fileName = cacheDirectory;
-            fileName += "/audiorecordtestTempFileTest.3gp";
+            fileName += "/temporaryFile.3gp";
 
             rightHeart.setOnTouchListener(recordVoiceListener);
+            calendarIcon.setOnClickListener(calendarPage);
+
+
+        Spinner symptoms_spinner = (Spinner) findViewById(R.id.symptoms_spinner);
+// Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> symptom_adapter = ArrayAdapter.createFromResource(this,
+                R.array.symptoms_array, android.R.layout.simple_spinner_item);
+// Specify the layout to use when the list of choices appears
+        symptom_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+// Apply the adapter to the spinner
+        symptoms_spinner.setAdapter(symptom_adapter);
+
+
+        Spinner mood_spinner = (Spinner) findViewById(R.id.mood_spinner);
+// Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> mood_adapter = ArrayAdapter.createFromResource(this,
+                R.array.mood_array, android.R.layout.simple_spinner_item);
+// Specify the layout to use when the list of choices appears
+        mood_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+// Apply the adapter to the spinner
+        mood_spinner.setAdapter(mood_adapter);
+
         }
 
 
 
-       void countUserClicks(View v, MotionEvent motionEvent) {
+       void countUserClicks() {
 
            if (i == 0) { //first time button is clicked
                startTime = System.nanoTime();
@@ -134,9 +178,9 @@ public class MainActivity extends AppCompatActivity {
            recorder = new MediaRecorder();
            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-           //recorder.setOutputFile(fileName);
+           recorder.setOutputFile(fileName);
            //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-           recorder.setOutputFile(cacheDirectory);
+           //recorder.setOutputFile(cacheDirectory);
            //}
            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
@@ -155,12 +199,15 @@ public class MainActivity extends AppCompatActivity {
             recorder = null;
 
             uploadAudio();
+
+
+
         }
 
         private void uploadAudio() {
             Toast.makeText(MainActivity.this, "Uploading started", Toast.LENGTH_SHORT).show();
 
-            StorageReference filepath= mStorageRef.child("Audio").child("new_audio123.3gp");
+            StorageReference filepath= mStorageRef.child("Audio").child("new_audioTESTUSER.3gp");
             Uri uri = Uri.fromFile(new File(fileName));
 
             filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -168,7 +215,20 @@ public class MainActivity extends AppCompatActivity {
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     Toast.makeText(MainActivity.this, "Uploading finished", Toast.LENGTH_SHORT).show();
                 }
-            });
+
+            })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(MainActivity.this, "Uploading failed", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+
+
+        private void displayCalendarPage(){
+            Intent calendarUI = new Intent(this, calendarActivity.class);
+            startActivity(calendarUI);
         }
 
 

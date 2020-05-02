@@ -24,12 +24,13 @@ public class loginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
 
     private EditText emailInput, passwordInput;
-    private Button loginBtn;
+    private Button loginBtn, registerBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        getSupportActionBar().hide();
 
 
         mAuth = FirebaseAuth.getInstance();
@@ -38,6 +39,8 @@ public class loginActivity extends AppCompatActivity {
         passwordInput = findViewById(R.id.passwordLogin);
 
         loginBtn = findViewById(R.id.loginButton);
+        registerBtn=findViewById(R.id.newUser);
+
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,8 +49,17 @@ public class loginActivity extends AppCompatActivity {
             }
         });
 
+        registerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(loginActivity.this, registrationActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
+    /*
     @Override
     public void onStart() {
         super.onStart();
@@ -55,6 +67,8 @@ public class loginActivity extends AppCompatActivity {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         //updateUI(currentUser);
     }
+    */
+
 
     private void loginUserAccount(){
 
