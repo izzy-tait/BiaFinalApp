@@ -31,16 +31,21 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Time;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static java.io.File.createTempFile;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class MainActivity extends AppCompatActivity {
 
         ImageView rightHeart;
         ImageButton calendarIcon;
+        ImageView notifyVoiceRecord;
         private int i=0;
         long startTime;
 
@@ -86,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().hide();
             rightHeart=findViewById(R.id.imageViewRight);
             calendarIcon=findViewById(R.id.calendarIcon);
+            notifyVoiceRecord=findViewById(R.id.notifyVoiceRecord);
 //            Context context= getApplicationContext();
 //            cacheDirectory= context.getCacheDir().toString();
             //File cacheDirectory = this.getCacheDir();
@@ -123,6 +129,14 @@ public class MainActivity extends AppCompatActivity {
         mood_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 // Apply the adapter to the spinner
         mood_spinner.setAdapter(mood_adapter);
+
+
+
+        Intent updatePeriodArrival=getIntent();  //get current Intent
+
+        String estimatedDaysLeft=updatePeriodArrival.getStringExtra("DAYS_LEFT");
+
+        Toast.makeText(MainActivity.this, estimatedDaysLeft, Toast.LENGTH_SHORT).show();
 
         }
 
@@ -179,9 +193,6 @@ public class MainActivity extends AppCompatActivity {
            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
            recorder.setOutputFile(fileName);
-           //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-           //recorder.setOutputFile(cacheDirectory);
-           //}
            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
            try {
@@ -191,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
            }
 
            recorder.start();
+           notifyVoiceRecord.setVisibility(View.VISIBLE);   //little black circle will appear next to top right heart when recording
        }
 
         private void stopRecording(){
@@ -199,21 +211,21 @@ public class MainActivity extends AppCompatActivity {
             recorder = null;
 
             uploadAudio();
-
-
+            notifyVoiceRecord.setVisibility(View.GONE);  //black dot next to top right heart will disappear when recording has stopped
 
         }
 
         private void uploadAudio() {
             Toast.makeText(MainActivity.this, "Uploading started", Toast.LENGTH_SHORT).show();
 
-            StorageReference filepath= mStorageRef.child("Audio").child("new_audioTESTUSER.3gp");
+            StorageReference filepath= mStorageRef.child("Audio").child(getCurrentTime() + ".3gp"); //File named with current date and time
             Uri uri = Uri.fromFile(new File(fileName));
 
             filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     Toast.makeText(MainActivity.this, "Uploading finished", Toast.LENGTH_SHORT).show();
+                    deleteLocalFile(fileName);
                 }
 
             })
@@ -229,6 +241,28 @@ public class MainActivity extends AppCompatActivity {
         private void displayCalendarPage(){
             Intent calendarUI = new Intent(this, calendarActivity.class);
             startActivity(calendarUI);
+        }
+
+        private String getCurrentTime(){
+            SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            Date date = new Date();
+            //System.out.println(formatter.format(date));
+
+
+            return formatter.format(date);
+        }
+
+        private void deleteLocalFile(String file){
+            File deleteFile = new File(file);
+
+            if(deleteFile.delete())
+            {
+                Toast.makeText(MainActivity.this, "File deleted successfully", Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                Toast.makeText(MainActivity.this, "File deletion failure", Toast.LENGTH_SHORT).show();
+            }
         }
 
 

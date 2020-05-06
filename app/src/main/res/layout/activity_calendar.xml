@@ -45,13 +45,43 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/biaheart" />
 
+
+
+    <ImageView
+        android:id="@+id/notifyVoiceRecord"
+        android:layout_width="22dp"
+        android:layout_height="17dp"
+        android:layout_marginTop="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/imageViewRight"
+        app:srcCompat="?android:attr/listChoiceIndicatorSingle"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/logPeriodBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Log Period"
+        android:background="#733067"
+        android:fontFamily="cursive"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.833" />
+
     <CalendarView
         android:id="@+id/calendarView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="236dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.297" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
