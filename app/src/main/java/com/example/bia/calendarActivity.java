@@ -4,6 +4,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -45,9 +46,13 @@ public class calendarActivity extends AppCompatActivity {
     private MediaRecorder recorder = null;
     private static String fileName = null;
     private static final String LOG_TAG = "Record_log";
-    Date periodStart;
-    CalendarView calendar;
-    Button logPeriodBtn;
+    private Date periodStart;
+    private CalendarView calendarView;
+    private Button logPeriodBtn;
+
+  /*  private mySQLiteDBHandler dbHandler;
+    private String selectedDate;
+    private SQLiteDatabase sqLiteDatabase;  //creates database*/
 
 
     private StorageReference mStorageRef;      //to be used with Firebase storage
@@ -100,7 +105,7 @@ public class calendarActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         rightHeart=findViewById(R.id.imageViewRight);
         leftHeart=findViewById(R.id.imageViewLeft);
-        calendar=findViewById(R.id.calendarView);
+        calendarView=findViewById(R.id.calendarView);
         notifyVoiceRecord=findViewById(R.id.notifyVoiceRecord);
 
         logPeriodBtn=findViewById(R.id.logPeriodBtn);
@@ -118,80 +123,9 @@ public class calendarActivity extends AppCompatActivity {
         leftHeart.setOnTouchListener(displayAudioFiles);
 
 
-
-       /* Date today = new Date();
-
-        Calendar nextYear = Calendar.getInstance();
-        nextYear.add(Calendar.YEAR, 1);
-
-        datePicker.init(today, nextYear.getTime())
-                .inMode(CalendarPickerView.SelectionMode.RANGE)
-                .withSelectedDate(today);
-
-        datePicker.setOnDateSelectedListener(new CalendarPickerView.OnDateSelectedListener() {
-            @Override
-            public void onDateSelected(Date date) {
-                //String selectedDate = DateFormat.getDateInstance(DateFormat.FULL).format(date);
-
-                Calendar calSelected = Calendar.getInstance();
-                calSelected.setTime(date);
-
-                String selectedDate = "" + calSelected.get(Calendar.DAY_OF_MONTH)
-                        + " " + (calSelected.get(Calendar.MONTH) + 1)
-                        + " " + calSelected.get(Calendar.YEAR);
-
-                Toast.makeText(calendarActivity.this, selectedDate, Toast.LENGTH_SHORT).show();
-            }
-            @Override
-            public void onDateUnselected(Date date) {
-
-            }
-        });
-
-        logPeriodBtn.setOnClickListener(logPeriodOnClickListener);*/
     }
 
 
-/*
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    long logPeriod(){          //This function takes the first date of period duration of user input and estimates next period
-        periodStart= datePicker.getSelectedDates().get(0);
-        String periodStartString= datePicker.getSelectedDates().get(0).toString();
-        //LocalDate today = LocalDate.now();
-
-        //System.out.println("Date before Addition: "+ periodStartString);
-        //Specifying date format that matches the given date
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar c = Calendar.getInstance();
-        try{
-            //Setting the date to the given date
-            c.setTime(sdf.parse(periodStartString));
-        }catch(ParseException e){
-            e.printStackTrace();
-        }
-
-
-        c.add(Calendar.DAY_OF_MONTH, 28); //Add number of days to user's input of first day they got their period
-
-        String periodArrival = sdf.format(c.getTime());  //Date of estimated period arrival
-
-
-        //Displaying the new Date after addition of Days
-        //System.out.println("Date after Addition: "+newDate);
-        long millis=System.currentTimeMillis();
-        java.sql.Date currentDate=new java.sql.Date(millis);
-        String currentDateString= currentDate.toString();
-
-        //Parsing the date
-        dateBefore = LocalDate.parse(currentDateString);
-        dateAfter = LocalDate.parse(periodArrival);
-
-
-
-        long noOfDaysBetween = ChronoUnit.DAYS.between(dateBefore, dateAfter);
-
-        return noOfDaysBetween;
-    }*/
 
 
 
@@ -246,9 +180,6 @@ public class calendarActivity extends AppCompatActivity {
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         recorder.setOutputFile(fileName);
-        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        //recorder.setOutputFile(cacheDirectory);
-        //}
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         try {
@@ -273,7 +204,7 @@ public class calendarActivity extends AppCompatActivity {
     private void uploadAudio() {
         Toast.makeText(calendarActivity.this, "Uploading started", Toast.LENGTH_SHORT).show();
 
-        StorageReference filepath= mStorageRef.child("Audio").child(getCurrentTime() + ".3gp");
+        StorageReference filepath= mStorageRef.child("Audio").child(getCurrentTime());
         Uri uri = Uri.fromFile(new File(fileName));
 
         filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -318,7 +249,7 @@ public class calendarActivity extends AppCompatActivity {
     }
 
     private String getCurrentTime(){
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         Date date = new Date();
         //System.out.println(formatter.format(date));
 

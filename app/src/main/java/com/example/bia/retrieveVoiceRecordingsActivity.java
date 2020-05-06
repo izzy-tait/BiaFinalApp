@@ -3,7 +3,10 @@ package com.example.bia;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -12,20 +15,21 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.SuccessContinuation;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class retrieveVoiceRecordingsActivity extends AppCompatActivity {
     private StorageReference mStorageRef;
     private ListView listView;
     ArrayList<String> arrayList;
-    int dog;
-    StorageReference item;
+    StorageReference file;
+    ArrayList<StorageReference> specificAudioFile;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +44,9 @@ public class retrieveVoiceRecordingsActivity extends AppCompatActivity {
         mStorageRef = FirebaseStorage.getInstance().getReference(userUid);
 
         arrayList= new ArrayList<>();
+        specificAudioFile=new ArrayList<>();
+
+
 
         //listFiles();
 
@@ -66,6 +73,8 @@ public class retrieveVoiceRecordingsActivity extends AppCompatActivity {
                             //Line above displays file location
                             setArrayList(item);
                             createArrayAdapter();
+                            //getItemRef(item);
+                            setFileName(item);
                         }
                     }
                 }) //end of OnSuccess method
@@ -73,6 +82,7 @@ public class retrieveVoiceRecordingsActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Toast.makeText(retrieveVoiceRecordingsActivity.this, "Could not retrieve audio files", Toast.LENGTH_SHORT).show();
+
                     }
                 });
 
@@ -83,15 +93,16 @@ public class retrieveVoiceRecordingsActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 Toast.makeText(retrieveVoiceRecordingsActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
+                streamFile(position);
             }
         });
 
 
     }   //end of OnCreate method
 
-    public void setArrayList(StorageReference item){
-        arrayList.add(item.toString());
-        dog=23;
+    public void setArrayList(StorageReference item){   //adds files from Firebase storage bucket to ListView object
+        arrayList.add(item.getName());
+        specificAudioFile.add(item);
     }
 
     public void createArrayAdapter(){
@@ -99,39 +110,43 @@ public class retrieveVoiceRecordingsActivity extends AppCompatActivity {
         listView.setAdapter(arrayAdapter);
     }
 
-   /* private void listFiles(){
-        //StorageReference listRef = storage.getReference().child("files/uid");
-        //StorageReference listRef= mStorageRef.child("Audio").child("new_audioTESTUSER.3gp");
-        StorageReference listRef= mStorageRef.child("Audio");
+    public void setFileName(StorageReference item){
+        file=item;
+    }
 
-        listRef.listAll()
-                .addOnSuccessListener(new OnSuccessListener<ListResult>() {
-                    @Override
-                    public void onSuccess(ListResult listResult) {
-                        for (StorageReference prefix : listResult.getPrefixes()) {
-                            // All the prefixes under listRef.
-                            // You may call listAll() recursively on them.
-                            Toast.makeText(retrieveVoiceRecordingsActivity.this, "Get Prefixes", Toast.LENGTH_SHORT).show();
 
+    public void streamFile(int position){
+
+        final MediaPlayer mediaPlayer= new MediaPlayer();
+        file=specificAudioFile.get(position);
+
+
+        file.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
+        {
+            @Override
+            public void onSuccess(Uri downloadUrl)
+            {
+
+                try{
+                    mediaPlayer.setDataSource(downloadUrl.toString());
+                    mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener(){
+                        @Override
+                        public void onPrepared(MediaPlayer mp){
+                            mp.start();
                         }
 
-                        for (StorageReference item : listResult.getItems()) {
-                            // All the items under listRef.
-                            Toast.makeText(retrieveVoiceRecordingsActivity.this, "Get Items", Toast.LENGTH_SHORT).show();
+                    });
 
-                            //Toast.makeText(retrieveVoiceRecordingsActivity.this, item.toString(), Toast.LENGTH_SHORT).show();
-                            //Line above displays file location
-                            arrayList.add(item.toString());
+                    mediaPlayer.prepare();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
+        });
 
-                        }
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(retrieveVoiceRecordingsActivity.this, "Could not retrieve audio files", Toast.LENGTH_SHORT).show();
-                    }
-                });
 
-    }*/
+    }
+
+
 }

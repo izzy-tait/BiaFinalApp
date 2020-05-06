@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
         private void uploadAudio() {
             Toast.makeText(MainActivity.this, "Uploading started", Toast.LENGTH_SHORT).show();
 
-            StorageReference filepath= mStorageRef.child("Audio").child(getCurrentTime() + ".3gp"); //File named with current date and time
+            StorageReference filepath= mStorageRef.child("Audio").child(getCurrentTime()); //File named with current date and time
             Uri uri = Uri.fromFile(new File(fileName));
 
             filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
