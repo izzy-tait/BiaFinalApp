@@ -3,40 +3,32 @@ package com.example.bia;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
+
 import android.content.Intent;
 import android.media.MediaRecorder;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Time;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
-import static java.io.File.createTempFile;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -46,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
         ImageView rightHeart;
         ImageButton calendarIcon;
         ImageView notifyVoiceRecord;
+        Button sendMood;
+        Button sendSymptom;
         private int i=0;
         long startTime;
 
@@ -53,18 +47,12 @@ public class MainActivity extends AppCompatActivity {
         private static String fileName = null;
         private static final String LOG_TAG = "Record_log";
 
-
-        //Context context= getApplicationContext();
-        //File cacheDirectory = this.getCacheDir();
-        //File tempFile= File.createTempFile("test1", "3gp", cacheDirectory);
-        //File tempFile=Context.getCacheDir().getAbsolutePath();
-        //String cacheDirectory=null;
-
-    //String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-kkmmss"));
-    //File outputFile = new File(context.getCacheDir(), "output-${timestamp}.txt")
+    Spinner symptoms_spinner;
+    Spinner mood_spinner;
 
 
-        private StorageReference mStorageRef;      //to be used with Firebase storage
+
+    private StorageReference mStorageRef;      //to be used with Firebase storage
 
 
         View.OnTouchListener recordVoiceListener = new View.OnTouchListener() {
@@ -84,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
     @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -92,23 +81,20 @@ public class MainActivity extends AppCompatActivity {
             rightHeart=findViewById(R.id.imageViewRight);
             calendarIcon=findViewById(R.id.calendarIcon);
             notifyVoiceRecord=findViewById(R.id.notifyVoiceRecord);
-//            Context context= getApplicationContext();
-//            cacheDirectory= context.getCacheDir().toString();
-            //File cacheDirectory = this.getCacheDir();
-            //tempFile = File.createTempFile("first", "3gp");
+            sendMood=findViewById(R.id.logMood);
+            sendSymptom=findViewById(R.id.logSymptoms);
 
-        //tempFile=new File(cacheDirectory, "testTempfile" + "3gp");
 
         String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         mStorageRef = FirebaseStorage.getInstance().getReference(userUid);
 
             fileName= Environment.getExternalStorageDirectory().getAbsolutePath();
-            //fileName = cacheDirectory;
             fileName += "/temporaryFile.3gp";
 
             rightHeart.setOnTouchListener(recordVoiceListener);
             calendarIcon.setOnClickListener(calendarPage);
+
 
 
         Spinner symptoms_spinner = (Spinner) findViewById(R.id.symptoms_spinner);
@@ -132,12 +118,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        Intent updatePeriodArrival=getIntent();  //get current Intent
-
-        String estimatedDaysLeft=updatePeriodArrival.getStringExtra("DAYS_LEFT");
-
-        Toast.makeText(MainActivity.this, estimatedDaysLeft, Toast.LENGTH_SHORT).show();
-
         }
 
 
@@ -153,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
            else if(i == 1) {
                if (System.nanoTime() - startTime < 1000000000) {//if less than one second occurs between the two clicks
                    startTime = System.nanoTime();
-                   //Toast.makeText(MainActivity.this, "Second click", Toast.LENGTH_SHORT).show();
                    ++i;
                }
                else{
@@ -163,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
            else if (i ==2) {  //third time button is clicked
                if (System.nanoTime() - startTime < 1000000000) {
                    //do voice recording and show that voice is recording
-                   Toast.makeText(MainActivity.this, "Start Recording", Toast.LENGTH_SHORT).show();
+                   //Toast.makeText(MainActivity.this, "Start Recording", Toast.LENGTH_SHORT).show();
                    startRecording();
                    ++i;
                } //end of if (System.nanoTime() - startTime < 1000000000)
@@ -183,8 +162,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         }
-
-
 
 
 
@@ -246,7 +223,6 @@ public class MainActivity extends AppCompatActivity {
         private String getCurrentTime(){
             SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
             Date date = new Date();
-            //System.out.println(formatter.format(date));
 
 
             return formatter.format(date);

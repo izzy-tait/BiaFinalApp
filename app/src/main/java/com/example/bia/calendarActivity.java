@@ -1,9 +1,12 @@
 package com.example.bia;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -15,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -46,13 +50,14 @@ public class calendarActivity extends AppCompatActivity {
     private MediaRecorder recorder = null;
     private static String fileName = null;
     private static final String LOG_TAG = "Record_log";
-    private Date periodStart;
     private CalendarView calendarView;
     private Button logPeriodBtn;
 
-  /*  private mySQLiteDBHandler dbHandler;
+   private mySQLiteDBHandler dbHandler;
     private String selectedDate;
-    private SQLiteDatabase sqLiteDatabase;  //creates database*/
+    private SQLiteDatabase sqLiteDatabase;  //creates database
+    private EditText editText;
+
 
 
     private StorageReference mStorageRef;      //to be used with Firebase storage
@@ -80,23 +85,6 @@ public class calendarActivity extends AppCompatActivity {
         }
     };
 
-/*    View.OnClickListener logPeriodOnClickListener= new View.OnClickListener(){
-        @RequiresApi(api = Build.VERSION_CODES.O)
-        @Override
-        public void onClick(View v){
-                Intent updatePeriodArrival = new Intent(calendarActivity.this, MainActivity.class);
-
-                Long estimatedDaysLeftLong = logPeriod();
-                estimatedDaysLeft= Long.toString(estimatedDaysLeftLong);
-
-                updatePeriodArrival.putExtra("DAYS_LEFT", estimatedDaysLeft);
-
-                startActivity(updatePeriodArrival);
-
-        }
-
-    };*/
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +98,11 @@ public class calendarActivity extends AppCompatActivity {
 
         logPeriodBtn=findViewById(R.id.logPeriodBtn);
 
+        editText = findViewById(R.id.editText);
+        calendarView = findViewById(R.id.calendarView);
+
+
+
 
 
         String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -122,9 +115,49 @@ public class calendarActivity extends AppCompatActivity {
         rightHeart.setOnTouchListener(recordVoiceListener);
         leftHeart.setOnTouchListener(displayAudioFiles);
 
+        calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                selectedDate = Integer.toString(year) + Integer.toString(month) + Integer.toString(dayOfMonth);
+                ReadDatabase(view);
+            }
+        });
+
+        try{
+
+            dbHandler = new mySQLiteDBHandler(this, "CalendarDatabase", null,1);
+            sqLiteDatabase = dbHandler.getWritableDatabase();
+            sqLiteDatabase.execSQL("CREATE TABLE EventCalendar(Date TEXT, Event TEXT)");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
 
     }
 
+
+
+    public void InsertDatabase(View view){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("Date",selectedDate);
+        contentValues.put("Event", editText.getText().toString());
+        sqLiteDatabase.insert("EventCalendar", null, contentValues);
+
+    }
+
+    public void ReadDatabase(View view){
+        String query = "Select Event from EventCalendar where Date = " + selectedDate;
+        try{
+            Cursor cursor = sqLiteDatabase.rawQuery(query, null);
+            cursor.moveToFirst();
+            editText.setText(cursor.getString(0));
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            editText.setText("");
+        }
+    }
 
 
 
@@ -140,7 +173,6 @@ public class calendarActivity extends AppCompatActivity {
         else if(i == 1) {
             if (System.nanoTime() - startTime < 1000000000) {//if less than one second occurs between the two clicks
                 startTime = System.nanoTime();
-                //Toast.makeText(MainActivity.this, "Second click", Toast.LENGTH_SHORT).show();
                 ++i;
             }
             else{
@@ -265,7 +297,7 @@ public class calendarActivity extends AppCompatActivity {
         }
         else
         {
-            //System.out.println("Failed to delete the file");
+
             Toast.makeText(calendarActivity.this, "File deletion failure", Toast.LENGTH_SHORT).show();
 
         }
